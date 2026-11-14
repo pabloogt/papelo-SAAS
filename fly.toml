@@ -1,0 +1,32 @@
+# Despliegue en Fly.io (región Madrid). Una sola máquina con volumen persistente.
+app = "papelo"
+primary_region = "mad"
+
+[build]
+
+[env]
+  NODE_ENV = "production"
+  APP_URL = "https://papelo.fly.dev"
+  TRUST_PROXY = "1"
+  EMAIL_FROM = "Papelo <avisos@tudominio.es>"
+
+[[mounts]]
+  source = "papelo_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  # La máquina debe seguir encendida: el programador de recordatorios corre en proceso.
+  auto_stop_machines = "off"
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    interval = "30s"
+    timeout = "5s"
+    method = "GET"
+    path = "/healthz"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
